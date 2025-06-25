@@ -378,4 +378,3 @@ var (
 	ErrValueTooLarge = errors.New("value too large")
 	ErrTreeCorrupted = errors.New("tree structure corrupted")
 )
-
