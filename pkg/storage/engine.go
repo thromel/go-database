@@ -1,3 +1,6 @@
+// Package storage provides the core storage engine interfaces and implementations
+// for the Go Database Engine. This package defines the abstractions for
+// persistent data storage, including key-value operations and iteration.
 package storage
 
 // StorageEngine defines the interface for the underlying storage mechanism.

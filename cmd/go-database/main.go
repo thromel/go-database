@@ -1,3 +1,6 @@
+// Command go-database provides a command-line interface for the Go Database Engine.
+// This tool allows users to interact with the database, run demonstrations,
+// and perform various database operations from the command line.
 package main
 
 import (
