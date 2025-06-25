@@ -22,7 +22,7 @@ func (bt *BPlusTree) insertRecursive(pageID page.PageID, key []byte, value []byt
 	if height == 0 {
 		// Leaf level - insert key-value pair
 		needsSplit := node.insertInLeaf(key, value, bt.leafCapacity)
-		
+
 		// Serialize the updated node back to the page
 		if err := bt.writeNodeToPage(node, currentPage); err != nil {
 			return 0, err
@@ -274,7 +274,7 @@ func (bt *BPlusTree) handleInternalChildUnderflow(pageID page.PageID, node *BPlu
 
 	// For a more complete implementation, we would:
 	// 1. Try to borrow from left sibling (if exists and has enough keys)
-	// 2. Try to borrow from right sibling (if exists and has enough keys)  
+	// 2. Try to borrow from right sibling (if exists and has enough keys)
 	// 3. Merge with left or right sibling if borrowing is not possible
 	// 4. Remove the merged child from this internal node
 	// 5. Recursively handle any resulting underflow in this node
@@ -285,7 +285,7 @@ func (bt *BPlusTree) handleInternalChildUnderflow(pageID page.PageID, node *BPlu
 	// - Merging with siblings when borrowing isn't possible
 	// - Updating parent keys after merging
 	// - Recursive underflow handling up the tree
-	
+
 	// For this basic implementation, we just ensure the tree structure remains valid
 	// without deallocating pages that might still be referenced
 
@@ -306,7 +306,7 @@ func (bt *BPlusTree) writeNodeToPage(node *BPlusTreeNode, pg *page.Page) error {
 	}
 
 	copy(pageData, data)
-	
+
 	// Clear any remaining data
 	for i := len(data); i < len(pageData); i++ {
 		pageData[i] = 0
@@ -314,3 +314,4 @@ func (bt *BPlusTree) writeNodeToPage(node *BPlusTreeNode, pg *page.Page) error {
 
 	return nil
 }
+

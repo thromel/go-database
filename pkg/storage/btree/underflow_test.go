@@ -9,7 +9,7 @@ import (
 
 func TestBPlusTreeDeleteWithUnderflow(t *testing.T) {
 	pageManager := page.NewManager()
-	
+
 	// Use a smaller leaf capacity to trigger underflow more easily
 	config := &Config{
 		BranchingFactor: 4,
@@ -17,7 +17,7 @@ func TestBPlusTreeDeleteWithUnderflow(t *testing.T) {
 		MaxKeySize:      64,
 		MaxValueSize:    128,
 	}
-	
+
 	tree, err := NewBPlusTree(pageManager, config)
 	if err != nil {
 		t.Fatalf("Failed to create B+ tree: %v", err)
@@ -74,7 +74,7 @@ func TestBPlusTreeDeleteWithUnderflow(t *testing.T) {
 func TestBPlusTreeEmptyAfterDeletes(t *testing.T) {
 	pageManager := page.NewManager()
 	config := DefaultConfig()
-	
+
 	tree, err := NewBPlusTree(pageManager, config)
 	if err != nil {
 		t.Fatalf("Failed to create B+ tree: %v", err)
@@ -123,7 +123,7 @@ func TestBPlusTreeEmptyAfterDeletes(t *testing.T) {
 func TestBPlusTreeMultipleDeletesAndInserts(t *testing.T) {
 	pageManager := page.NewManager()
 	config := DefaultConfig()
-	
+
 	tree, err := NewBPlusTree(pageManager, config)
 	if err != nil {
 		t.Fatalf("Failed to create B+ tree: %v", err)
@@ -132,12 +132,12 @@ func TestBPlusTreeMultipleDeletesAndInserts(t *testing.T) {
 	// Perform multiple rounds of insertions and deletions
 	for round := 0; round < 3; round++ {
 		t.Logf("Round %d: Inserting keys", round+1)
-		
+
 		// Insert keys for this round
 		for i := 0; i < 10; i++ {
 			key := []byte(fmt.Sprintf("round%d-key%d", round, i))
 			value := []byte(fmt.Sprintf("round%d-value%d", round, i))
-			
+
 			err = tree.Put(key, value)
 			if err != nil {
 				t.Fatalf("Round %d: Failed to put key%d: %v", round, i, err)
@@ -145,11 +145,11 @@ func TestBPlusTreeMultipleDeletesAndInserts(t *testing.T) {
 		}
 
 		t.Logf("Round %d: Verifying keys exist", round+1)
-		
+
 		// Verify all keys exist
 		for i := 0; i < 10; i++ {
 			key := []byte(fmt.Sprintf("round%d-key%d", round, i))
-			
+
 			exists, err := tree.Exists(key)
 			if err != nil {
 				t.Fatalf("Round %d: Failed to check existence of key%d: %v", round, i, err)
@@ -160,11 +160,11 @@ func TestBPlusTreeMultipleDeletesAndInserts(t *testing.T) {
 		}
 
 		t.Logf("Round %d: Deleting half the keys", round+1)
-		
+
 		// Delete half the keys
 		for i := 0; i < 5; i++ {
 			key := []byte(fmt.Sprintf("round%d-key%d", round, i))
-			
+
 			err = tree.Delete(key)
 			if err != nil {
 				t.Fatalf("Round %d: Failed to delete key%d: %v", round, i, err)
@@ -172,11 +172,11 @@ func TestBPlusTreeMultipleDeletesAndInserts(t *testing.T) {
 		}
 
 		t.Logf("Round %d: Verifying deleted keys don't exist", round+1)
-		
+
 		// Verify deleted keys don't exist
 		for i := 0; i < 5; i++ {
 			key := []byte(fmt.Sprintf("round%d-key%d", round, i))
-			
+
 			exists, err := tree.Exists(key)
 			if err != nil {
 				t.Fatalf("Round %d: Failed to check existence after deletion of key%d: %v", round, i, err)
@@ -188,9 +188,10 @@ func TestBPlusTreeMultipleDeletesAndInserts(t *testing.T) {
 
 		// Check tree stats
 		stats := tree.Stats()
-		expectedKeys := int64((round+1) * 5) // 5 remaining keys per round
+		expectedKeys := int64((round + 1) * 5) // 5 remaining keys per round
 		if stats.NumKeys != expectedKeys {
 			t.Errorf("Round %d: Expected %d keys, got %d", round, expectedKeys, stats.NumKeys)
 		}
 	}
 }
+

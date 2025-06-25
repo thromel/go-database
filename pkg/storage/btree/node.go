@@ -222,6 +222,7 @@ func (node *BPlusTreeNode) deleteFromLeaf(key []byte, minCapacity int) bool {
 
 // deleteFromInternal removes a key from an internal node.
 // Returns whether the node is now underfull.
+// NOTE: Currently unused but kept for future complete underflow handling implementation.
 func (node *BPlusTreeNode) deleteFromInternal(key []byte, minCapacity int) bool {
 	if node.isLeaf {
 		return false
@@ -245,6 +246,7 @@ func (node *BPlusTreeNode) deleteFromInternal(key []byte, minCapacity int) bool 
 }
 
 // canBorrowLeft checks if this node can borrow an entry from its left sibling.
+// NOTE: Currently unused but kept for future complete underflow handling implementation.
 func (node *BPlusTreeNode) canBorrowLeft(leftSibling *BPlusTreeNode, minCapacity int) bool {
 	if leftSibling == nil {
 		return false
@@ -253,6 +255,7 @@ func (node *BPlusTreeNode) canBorrowLeft(leftSibling *BPlusTreeNode, minCapacity
 }
 
 // canBorrowRight checks if this node can borrow an entry from its right sibling.
+// NOTE: Currently unused but kept for future complete underflow handling implementation.
 func (node *BPlusTreeNode) canBorrowRight(rightSibling *BPlusTreeNode, minCapacity int) bool {
 	if rightSibling == nil {
 		return false
@@ -261,6 +264,7 @@ func (node *BPlusTreeNode) canBorrowRight(rightSibling *BPlusTreeNode, minCapaci
 }
 
 // borrowFromLeft borrows an entry from the left sibling.
+// NOTE: Currently unused but kept for future complete underflow handling implementation.
 func (node *BPlusTreeNode) borrowFromLeft(leftSibling *BPlusTreeNode, parentKey []byte) []byte {
 	if node.isLeaf {
 		// Borrow the last entry from left sibling
@@ -298,6 +302,7 @@ func (node *BPlusTreeNode) borrowFromLeft(leftSibling *BPlusTreeNode, parentKey 
 }
 
 // borrowFromRight borrows an entry from the right sibling.
+// NOTE: Currently unused but kept for future complete underflow handling implementation.
 func (node *BPlusTreeNode) borrowFromRight(rightSibling *BPlusTreeNode, parentKey []byte) []byte {
 	if node.isLeaf {
 		// Borrow the first entry from right sibling
@@ -338,6 +343,7 @@ func (node *BPlusTreeNode) borrowFromRight(rightSibling *BPlusTreeNode, parentKe
 }
 
 // merge merges this node with its right sibling.
+// NOTE: Currently unused but kept for future complete underflow handling implementation.
 func (node *BPlusTreeNode) merge(rightSibling *BPlusTreeNode, parentKey []byte) {
 	if node.isLeaf {
 		// Merge leaf nodes
@@ -377,6 +383,8 @@ func insertPageIDAt(slice []page.PageID, index int, value page.PageID) []page.Pa
 	return result
 }
 
+// removePageIDAt removes a PageID at the specified index.
+// NOTE: Currently unused but kept for future complete underflow handling implementation.
 func removePageIDAt(slice []page.PageID, index int) []page.PageID {
 	result := make([]page.PageID, len(slice)-1)
 	copy(result[:index], slice[:index])
@@ -413,6 +421,9 @@ func (bt *BPlusTree) serializeNode(node *BPlusTreeNode) ([]byte, error) {
 
 	// Write number of keys (4 bytes)
 	numKeysBytes := make([]byte, 4)
+	if len(node.keys) > int(^uint32(0)) {
+		return nil, errors.New("too many keys to serialize")
+	}
 	binary.LittleEndian.PutUint32(numKeysBytes, uint32(len(node.keys)))
 	buffer = append(buffer, numKeysBytes...)
 
@@ -420,6 +431,9 @@ func (bt *BPlusTree) serializeNode(node *BPlusTreeNode) ([]byte, error) {
 	for _, key := range node.keys {
 		// Write key length (4 bytes)
 		keyLenBytes := make([]byte, 4)
+		if len(key) > int(^uint32(0)) {
+			return nil, errors.New("key too large to serialize")
+		}
 		binary.LittleEndian.PutUint32(keyLenBytes, uint32(len(key)))
 		buffer = append(buffer, keyLenBytes...)
 
@@ -432,6 +446,9 @@ func (bt *BPlusTree) serializeNode(node *BPlusTreeNode) ([]byte, error) {
 		for _, value := range node.values {
 			// Write value length (4 bytes)
 			valueLenBytes := make([]byte, 4)
+			if len(value) > int(^uint32(0)) {
+				return nil, errors.New("value too large to serialize")
+			}
 			binary.LittleEndian.PutUint32(valueLenBytes, uint32(len(value)))
 			buffer = append(buffer, valueLenBytes...)
 
@@ -469,11 +486,19 @@ func (bt *BPlusTree) deserializeNode(pg *page.Page) (*BPlusTreeNode, error) {
 	offset++
 
 	// Read next pointer (8 bytes)
-	node.next = page.PageID(binary.LittleEndian.Uint64(data[offset:]))
+	nextPtr := binary.LittleEndian.Uint64(data[offset:])
+	if nextPtr > uint64(^uint32(0)) {
+		return nil, errors.New("next pointer value too large for PageID")
+	}
+	node.next = page.PageID(nextPtr)
 	offset += 8
 
 	// Read parent pointer (8 bytes)
-	node.parent = page.PageID(binary.LittleEndian.Uint64(data[offset:]))
+	parentPtr := binary.LittleEndian.Uint64(data[offset:])
+	if parentPtr > uint64(^uint32(0)) {
+		return nil, errors.New("parent pointer value too large for PageID")
+	}
+	node.parent = page.PageID(parentPtr)
 	offset += 8
 
 	// Read number of keys (4 bytes)
@@ -527,10 +552,15 @@ func (bt *BPlusTree) deserializeNode(pg *page.Page) (*BPlusTreeNode, error) {
 				return nil, errors.New("insufficient data for child page ID")
 			}
 
-			node.children[i] = page.PageID(binary.LittleEndian.Uint64(data[offset:]))
+			childPageID := binary.LittleEndian.Uint64(data[offset:])
+			if childPageID > uint64(^uint32(0)) {
+				return nil, errors.New("child page ID value too large for PageID")
+			}
+			node.children[i] = page.PageID(childPageID)
 			offset += 8
 		}
 	}
 
 	return node, nil
 }
+

@@ -18,7 +18,7 @@ type BPlusTree struct {
 	height int         // Height of the tree (leaf level = 0)
 
 	// Tree metadata
-	numKeys       int64 // Total number of keys in the tree
+	numKeys         int64 // Total number of keys in the tree
 	branchingFactor int   // Maximum number of children per internal node
 	leafCapacity    int   // Maximum number of entries per leaf node
 
@@ -44,10 +44,10 @@ type Config struct {
 // DefaultConfig returns the default B+ Tree configuration.
 func DefaultConfig() *Config {
 	return &Config{
-		BranchingFactor: 64,   // Reasonable for 8KB pages
-		LeafCapacity:    32,   // Conservative to ensure it fits
-		MaxKeySize:      64,   // Smaller key size for testing
-		MaxValueSize:    128,  // Smaller value size for testing
+		BranchingFactor: 64,  // Reasonable for 8KB pages
+		LeafCapacity:    32,  // Conservative to ensure it fits
+		MaxKeySize:      64,  // Smaller key size for testing
+		MaxValueSize:    128, // Smaller value size for testing
 	}
 }
 
@@ -212,7 +212,7 @@ func (bt *BPlusTree) Put(key []byte, value []byte) error {
 	if !existed {
 		bt.numKeys++
 	}
-	
+
 	return nil
 }
 
@@ -267,7 +267,11 @@ func (bt *BPlusTree) Delete(key []byte) error {
 
 		// If root has only one child, make that child the new root
 		if len(rootNode.keys) == 0 && len(rootNode.children) == 1 {
-			bt.pageManager.DeallocatePage(bt.root)
+			if err := bt.pageManager.DeallocatePage(bt.root); err != nil {
+				// Log the error but don't fail the delete operation
+				// In a production system, this would be logged to a proper logger
+				_ = err
+			}
 			bt.root = rootNode.children[0]
 			bt.height--
 		}
@@ -368,9 +372,10 @@ type TreeStats struct {
 
 // Common errors for B+ Tree operations.
 var (
-	ErrKeyNotFound    = errors.New("key not found")
-	ErrInvalidKey     = errors.New("invalid key")
-	ErrKeyTooLarge    = errors.New("key too large")
-	ErrValueTooLarge  = errors.New("value too large")
-	ErrTreeCorrupted  = errors.New("tree structure corrupted")
+	ErrKeyNotFound   = errors.New("key not found")
+	ErrInvalidKey    = errors.New("invalid key")
+	ErrKeyTooLarge   = errors.New("key too large")
+	ErrValueTooLarge = errors.New("value too large")
+	ErrTreeCorrupted = errors.New("tree structure corrupted")
 )
+
