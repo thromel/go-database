@@ -15,7 +15,13 @@ all: fmt vet test build
 # Build the binary
 build:
 	@echo "Building $(BINARY_NAME)..."
-	@go build -o bin/$(BINARY_NAME) $(MAIN_PATH)
+	@mkdir -p bin
+	@if [ -d "$(MAIN_PATH)" ]; then \
+		go build -o bin/$(BINARY_NAME) $(MAIN_PATH); \
+	else \
+		echo "CLI not implemented yet - building packages only"; \
+		go build ./pkg/...; \
+	fi
 
 # Clean build artifacts
 clean:
