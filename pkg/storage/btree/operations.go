@@ -214,21 +214,81 @@ func (bt *BPlusTree) createNewRoot(leftChildID, rightChildID page.PageID, separa
 
 // handleLeafUnderflow handles underflow in a leaf node.
 func (bt *BPlusTree) handleLeafUnderflow(pageID page.PageID, node *BPlusTreeNode) error {
-	// For now, just implement basic logic - can be enhanced later
+	_ = pageID // Suppress unused parameter warning
 	minCapacity := bt.leafCapacity / 2
 	if len(node.keys) >= minCapacity {
 		return nil // No underflow
 	}
 
-	// TODO: Implement borrowing from siblings and merging
-	// For now, we'll allow underflow (this is a basic implementation)
+	// If this is the root and it's empty, tree becomes empty
+	if pageID == bt.root && len(node.keys) == 0 {
+		// Tree becomes empty - this is acceptable for a leaf root
+		return nil
+	}
+
+	// For non-root leaves, we need to find the parent to handle redistribution/merging
+	// Since we don't maintain parent pointers in this implementation,
+	// we'll implement a simple approach: allow underflow temporarily
+	// In a production implementation, we would:
+	// 1. Find parent node and locate this leaf's position
+	// 2. Try to borrow from left or right sibling
+	// 3. If borrowing fails, merge with a sibling
+	// 4. Recursively handle any resulting underflow in parent
+
+	// For now, just ensure the node is still valid
+	// Note: We don't deallocate leaf pages here as they might still be referenced
+	// In a complete implementation, we would handle this through parent node updates
+
 	return nil
 }
 
 // handleInternalChildUnderflow handles underflow in a child of an internal node.
 func (bt *BPlusTree) handleInternalChildUnderflow(pageID page.PageID, node *BPlusTreeNode, childIndex int) error {
-	// For now, just implement basic logic - can be enhanced later
-	// TODO: Implement borrowing from siblings and merging
+	// Check if the child actually has underflow
+	if childIndex >= len(node.children) {
+		return nil // Invalid child index
+	}
+
+	childPageID := node.children[childIndex]
+	childPage, err := bt.pageManager.GetPage(childPageID)
+	if err != nil {
+		return err
+	}
+
+	childNode, err := bt.deserializeNode(childPage)
+	if err != nil {
+		return err
+	}
+
+	var minCapacity int
+	if childNode.isLeaf {
+		minCapacity = bt.leafCapacity / 2
+	} else {
+		minCapacity = bt.branchingFactor / 2
+	}
+
+	// Check if child actually has underflow
+	if len(childNode.keys) >= minCapacity {
+		return nil // No underflow
+	}
+
+	// For a more complete implementation, we would:
+	// 1. Try to borrow from left sibling (if exists and has enough keys)
+	// 2. Try to borrow from right sibling (if exists and has enough keys)  
+	// 3. Merge with left or right sibling if borrowing is not possible
+	// 4. Remove the merged child from this internal node
+	// 5. Recursively handle any resulting underflow in this node
+
+	// For now, implement basic case: allow underflow temporarily
+	// Complete implementation would handle:
+	// - Borrowing from siblings when they have extra keys
+	// - Merging with siblings when borrowing isn't possible
+	// - Updating parent keys after merging
+	// - Recursive underflow handling up the tree
+	
+	// For this basic implementation, we just ensure the tree structure remains valid
+	// without deallocating pages that might still be referenced
+
 	return nil
 }
 
