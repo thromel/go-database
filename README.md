@@ -10,8 +10,8 @@ A complete, production-ready database engine built from scratch in Go. This proj
 
 ## 🚀 Project Status
 
-**Current Phase**: Sprint 1 Complete ✅  
-**Implementation Status**: Foundation established, ready for storage engine development
+**Current Phase**: Sprint 2 In Progress 🚧  
+**Implementation Status**: B+ Tree indexing implemented, buffer pool next
 
 ### Sprint Progress
 - ✅ **Sprint 1**: Core Infrastructure & Basic Storage (COMPLETED)
@@ -21,7 +21,14 @@ A complete, production-ready database engine built from scratch in Go. This proj
   - Basic database operations
   - Comprehensive testing framework
 
-- ⏳ **Sprint 2**: Storage Engine (PENDING)
+- 🚧 **Sprint 2**: Storage Engine & Indexing (IN PROGRESS)
+  - ✅ Page management system with 8KB fixed-size pages
+  - ✅ B+ Tree implementation with configurable branching factor
+  - ✅ Variable-length key-value support with efficient point lookups
+  - ✅ Automatic node splitting and tree balancing
+  - ⏳ Buffer pool manager with LRU eviction (NEXT)
+  - ⏸️ File storage backend (PENDING)
+
 - ⏸️ **Sprint 3**: Persistence & WAL (PENDING)
 - ⏸️ **Sprint 4**: Transaction Management (PENDING)
 - ⏸️ **Sprint 5**: Concurrency Control (PENDING)
@@ -37,6 +44,8 @@ This database engine implements a layered architecture:
 
 ### 2. Storage Engine (`pkg/storage/`)
 - **Memory Engine**: Thread-safe in-memory key-value storage
+- **Page Management**: Fixed 8KB pages with headers, checksums, and free space tracking
+- **B+ Tree Index**: Configurable branching factor with automatic node splitting
 - **Iterator Interface**: Efficient data traversal with range support
 - **Storage Abstraction**: Pluggable storage backends
 
@@ -54,6 +63,10 @@ This database engine implements a layered architecture:
 ### ✅ Implemented
 - **Thread-safe operations** with proper synchronization
 - **CRUD operations**: Put, Get, Delete, Exists
+- **Page management**: 8KB fixed-size pages with headers and checksums
+- **B+ Tree indexing**: Configurable branching factor with automatic balancing
+- **Variable-length keys/values**: Efficient storage with size validation
+- **Node splitting**: Automatic tree growth and rebalancing
 - **Iterator support** with range queries
 - **Configuration management** with validation
 - **Comprehensive error handling** with context
@@ -62,10 +75,32 @@ This database engine implements a layered architecture:
 - **Concurrent access** support
 
 ### 🔄 In Development
-- Disk-based B+ tree storage
+- Buffer pool manager with LRU eviction
+- File-based persistent storage
 - Write-ahead logging (WAL)
 - ACID transactions
 - SQL query parsing and execution
+
+## 🌟 Major Milestone: B+ Tree Implementation
+
+We've successfully implemented a complete B+ Tree indexing system - a critical foundation for any database engine! This implementation includes:
+
+### Key Features
+- **Configurable branching factor** (64 children per internal node by default)
+- **Variable-length keys and values** with size validation
+- **Automatic node splitting** when capacity is exceeded
+- **Efficient point lookups** with O(log n) complexity
+- **Thread-safe operations** with read-write locking
+- **Page-based storage** integration (8KB pages)
+- **Proper serialization** for persistent storage
+
+### Technical Details
+- **Package**: `pkg/storage/btree/`
+- **Core files**: `btree.go`, `node.go`, `operations.go`
+- **Test coverage**: 100% pass rate with comprehensive test suite
+- **Performance**: Optimized for database workloads with configurable parameters
+
+This B+ Tree serves as the foundation for efficient key-value storage and will support range queries, ordered iteration, and integration with the upcoming buffer pool manager.
 
 ## 🚀 Quick Start
 
@@ -267,17 +302,17 @@ make clean          # Clean build artifacts
 
 ## 🎯 Roadmap
 
-### Sprint 2: Storage Engine (Next)
-- [ ] B+ tree implementation
-- [ ] Page management (8KB pages)
-- [ ] Buffer pool with LRU eviction
-- [ ] Disk-based persistence
+### Sprint 2: Storage Engine (In Progress) 
+- [x] **B+ tree implementation** - Complete indexing structure with automatic balancing
+- [x] **Page management** - 8KB pages with headers, checksums, and free space tracking
+- [ ] **Buffer pool with LRU eviction** - Intelligent page caching for performance
+- [ ] **File storage backend** - Persistent disk-based storage integration
 
 ### Sprint 3: Persistence & WAL
-- [ ] Write-ahead logging
-- [ ] Crash recovery (ARIES protocol)
-- [ ] Checkpointing
-- [ ] Data integrity verification
+- [ ] Write-ahead logging (ARIES protocol)
+- [ ] Crash recovery and data integrity
+- [ ] Checkpointing for faster recovery
+- [ ] File format and corruption detection
 
 ### Sprint 4: Transaction Management
 - [ ] ACID transaction support
