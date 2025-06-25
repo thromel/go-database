@@ -332,17 +332,17 @@ func (bp *BufferPool) moveToFront(frame *Frame) {
 func (bp *BufferPool) GetStatistics() Statistics {
 	bp.mu.RLock()
 	defer bp.mu.RUnlock()
-	
+
 	stats := bp.stats
 	stats.PinnedPages = 0
-	
+
 	// Count pinned pages
 	for _, frame := range bp.frames {
 		if frame.IsPinned() {
 			stats.PinnedPages++
 		}
 	}
-	
+
 	return stats
 }
 

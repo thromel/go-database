@@ -323,13 +323,11 @@ func TestBufferPool_FlushAllPages(t *testing.T) {
 	bp := NewBufferPool(5, pageManager)
 
 	// Allocate and dirty some pages
-	var pages []*page.Page
 	for i := 0; i < 3; i++ {
 		pg, err := pageManager.AllocatePage(page.PageTypeLeaf)
 		if err != nil {
 			t.Fatalf("Failed to allocate page %d: %v", i, err)
 		}
-		pages = append(pages, pg)
 
 		_, err = bp.GetPage(pg.ID())
 		if err != nil {
