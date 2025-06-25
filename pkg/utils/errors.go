@@ -1,3 +1,5 @@
+// Package utils provides common utilities, error types, and helper functions
+// used throughout the Go Database Engine.
 package utils
 
 import (

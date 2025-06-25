@@ -1,6 +1,6 @@
-// Package transaction provides ACID transaction management for the database engine.
-// It includes support for different isolation levels, deadlock detection, and
-// automatic retry policies for handling transaction conflicts.
+// Package transaction provides ACID transaction management capabilities
+// for the Go Database Engine, including transaction interfaces, isolation
+// levels, and concurrency control mechanisms.
 package transaction
 
 import (

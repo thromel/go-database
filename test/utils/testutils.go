@@ -1,3 +1,6 @@
+// Package testutils provides testing utilities and helper functions
+// for the Go Database Engine test suite, including test database setup,
+// data generation, and common test patterns.
 package testutils
 
 import (
