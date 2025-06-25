@@ -42,6 +42,8 @@ You are helping implement a database engine that will:
 ## ALWAYS START HERE: Sprint 1 Foundation
 **File**: `/Users/romel/Documents/GitHub/go-database/sprints/sprint-01-foundation.md`
 
+#### IMPORTANT: Always update sprint file after completion of each task.
+
 **Sprint 1 Key Tasks**:
 1. **Project Setup**: Initialize Go module, create package structure
 2. **Core Interfaces**: Define Database, StorageEngine, Transaction interfaces  
