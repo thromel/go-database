@@ -21,7 +21,7 @@ type DatabaseImpl struct {
 	storage storage.StorageEngine
 
 	// txnManager handles transaction lifecycle
-	txnManager transaction.TransactionManager
+	txnManager transaction.Manager
 
 	// mu protects concurrent access to database state
 	mu sync.RWMutex
@@ -147,8 +147,7 @@ func (db *DatabaseImpl) Put(key []byte, value []byte) error {
 		return utils.NewDatabaseErrorWithKey("put", key, err)
 	}
 
-	// Update stats
-	db.stats.KeyCount++
+	// Note: Stats will be updated when requested to avoid race conditions
 
 	return nil
 }
@@ -184,8 +183,7 @@ func (db *DatabaseImpl) Delete(key []byte) error {
 		return utils.NewDatabaseErrorWithKey("delete", key, err)
 	}
 
-	// Update stats
-	db.stats.KeyCount--
+	// Note: Stats will be updated when requested to avoid race conditions
 
 	return nil
 }

@@ -156,7 +156,7 @@ func NewDatabaseErrorWithKey(op string, key []byte, err error) *DatabaseError {
 	return &DatabaseError{
 		Op:  op,
 		Key: key,
-		Err:  err,
+		Err: err,
 	}
 }
 

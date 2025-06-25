@@ -164,7 +164,7 @@ func DefaultConfig() *Config {
 		ReadOnly: false,
 		Memory: MemoryConfig{
 			BufferPoolSize:        64 * 1024 * 1024, // 64MB
-			MaxMemoryUsage:        0,                 // unlimited
+			MaxMemoryUsage:        0,                // unlimited
 			CacheSize:             16 * 1024 * 1024, // 16MB
 			EnableMemoryProfiling: false,
 		},
@@ -200,15 +200,15 @@ func DefaultConfig() *Config {
 			StatisticsInterval:  5 * time.Minute,
 		},
 		Logging: LoggingConfig{
-			Level:                   "INFO",
-			File:                    "",
-			MaxSize:                 100, // 100MB
-			MaxBackups:              3,
-			MaxAge:                  28, // 28 days
-			Compress:                true,
-			EnableQueryLogging:      false,
-			EnableSlowQueryLogging:  true,
-			SlowQueryThreshold:      1 * time.Second,
+			Level:                  "INFO",
+			File:                   "",
+			MaxSize:                100, // 100MB
+			MaxBackups:             3,
+			MaxAge:                 28, // 28 days
+			Compress:               true,
+			EnableQueryLogging:     false,
+			EnableSlowQueryLogging: true,
+			SlowQueryThreshold:     1 * time.Second,
 		},
 	}
 }
@@ -253,11 +253,11 @@ func (c *Config) Validate() error {
 
 // Configuration validation errors
 var (
-	ErrConfigPathRequired            = errors.New("config: path is required")
-	ErrInvalidBufferPoolSize         = errors.New("config: buffer pool size must be positive")
-	ErrInvalidPageSize               = errors.New("config: page size must be between 1 and 65536 bytes")
-	ErrInvalidMaxActiveTransactions  = errors.New("config: max active transactions must be positive")
-	ErrInvalidTransactionTimeout     = errors.New("config: transaction timeout must be positive")
-	ErrInvalidMaxConcurrentReads     = errors.New("config: max concurrent reads must be positive")
-	ErrInvalidMaxConcurrentWrites    = errors.New("config: max concurrent writes must be positive")
+	ErrConfigPathRequired           = errors.New("config: path is required")
+	ErrInvalidBufferPoolSize        = errors.New("config: buffer pool size must be positive")
+	ErrInvalidPageSize              = errors.New("config: page size must be between 1 and 65536 bytes")
+	ErrInvalidMaxActiveTransactions = errors.New("config: max active transactions must be positive")
+	ErrInvalidTransactionTimeout    = errors.New("config: transaction timeout must be positive")
+	ErrInvalidMaxConcurrentReads    = errors.New("config: max concurrent reads must be positive")
+	ErrInvalidMaxConcurrentWrites   = errors.New("config: max concurrent writes must be positive")
 )

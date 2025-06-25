@@ -15,7 +15,7 @@ func TestMemoryEngine_BasicOperations(t *testing.T) {
 	// Test Put
 	key := []byte("test-key")
 	value := []byte("test-value")
-	
+
 	err := engine.Put(key, value)
 	if err != nil {
 		t.Fatalf("Put failed: %v", err)
@@ -26,7 +26,7 @@ func TestMemoryEngine_BasicOperations(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Get failed: %v", err)
 	}
-	
+
 	if !bytes.Equal(result, value) {
 		t.Errorf("Expected %s, got %s", value, result)
 	}
@@ -36,7 +36,7 @@ func TestMemoryEngine_BasicOperations(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Exists failed: %v", err)
 	}
-	
+
 	if !exists {
 		t.Error("Key should exist")
 	}
@@ -58,7 +58,7 @@ func TestMemoryEngine_BasicOperations(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Exists failed: %v", err)
 	}
-	
+
 	if exists {
 		t.Error("Key should not exist after delete")
 	}
@@ -133,16 +133,16 @@ func TestMemoryEngine_Iterator(t *testing.T) {
 	for iter.SeekToFirst(); iter.Valid(); iter.Next() {
 		key := string(iter.Key())
 		value := string(iter.Value())
-		
+
 		expectedValue, exists := testData[key]
 		if !exists {
 			t.Errorf("Unexpected key: %s", key)
 		}
-		
+
 		if value != expectedValue {
 			t.Errorf("Expected value %s for key %s, got %s", expectedValue, key, value)
 		}
-		
+
 		count++
 	}
 
@@ -245,30 +245,30 @@ func TestMemoryEngine_ThreadSafety(t *testing.T) {
 	for i := 0; i < numGoroutines; i++ {
 		go func(id int) {
 			defer func() { done <- true }()
-			
+
 			for j := 0; j < numOperations; j++ {
 				key := []byte(fmt.Sprintf("key-%d-%d", id, j))
 				value := []byte(fmt.Sprintf("value-%d-%d", id, j))
-				
+
 				// Put
 				err := engine.Put(key, value)
 				if err != nil {
 					t.Errorf("Put failed: %v", err)
 					return
 				}
-				
+
 				// Get
 				result, err := engine.Get(key)
 				if err != nil {
 					t.Errorf("Get failed: %v", err)
 					return
 				}
-				
+
 				if !bytes.Equal(result, value) {
 					t.Errorf("Expected %s, got %s", value, result)
 					return
 				}
-				
+
 				// Delete
 				err = engine.Delete(key)
 				if err != nil {
@@ -367,7 +367,7 @@ func BenchmarkMemoryEngine_Get(b *testing.B) {
 
 	key := []byte("benchmark-key")
 	value := []byte("benchmark-value")
-	
+
 	// Setup
 	err := engine.Put(key, value)
 	if err != nil {

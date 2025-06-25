@@ -42,9 +42,9 @@ test-race:
 # Run tests with coverage
 coverage:
 	@echo "Running tests with coverage..."
-	@go test -coverprofile=coverage.out ./...
-	@go tool cover -html=coverage.out -o coverage.html
-	@go tool cover -func=coverage.out
+	@go test -coverprofile=coverage.txt ./...
+	@go tool cover -html=coverage.txt -o coverage.html
+	@go tool cover -func=coverage.txt
 	@echo "Coverage report generated: coverage.html"
 
 # Run all tests including integration and performance
@@ -67,10 +67,15 @@ test-performance:
 # Run coverage for all packages
 coverage-all:
 	@echo "Running coverage for all packages..."
-	@go test -coverprofile=coverage.out ./pkg/... ./test/...
-	@go tool cover -html=coverage.out -o coverage.html
-	@go tool cover -func=coverage.out
+	@go test -coverprofile=coverage.txt ./pkg/... ./test/...
+	@go tool cover -html=coverage.txt -o coverage.html
+	@go tool cover -func=coverage.txt
 	@echo "Coverage report generated: coverage.html"
+
+# Run detailed coverage analysis
+coverage-detailed:
+	@echo "Running detailed coverage analysis..."
+	@./scripts/coverage.sh
 
 # Lint code
 lint:
@@ -111,6 +116,7 @@ help:
 	@echo "  test        - Run tests"
 	@echo "  test-race   - Run tests with race detector"
 	@echo "  coverage    - Run tests with coverage report"
+	@echo "  coverage-detailed - Run detailed coverage analysis"
 	@echo "  lint        - Run linters"
 	@echo "  fmt         - Format code"
 	@echo "  vet         - Vet code"

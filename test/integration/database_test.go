@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/romel/go-database/pkg/api"
-	"github.com/romel/go-database/test/utils"
+	testutils "github.com/romel/go-database/test/utils"
 )
 
 // TestDatabaseLifecycle tests the complete database lifecycle.
@@ -20,9 +20,9 @@ func TestDatabaseLifecycle(t *testing.T) {
 
 	// Test data operations
 	testData := map[string]string{
-		"user:1":    "john@example.com",
-		"user:2":    "jane@example.com",
-		"config:db": "localhost:5432",
+		"user:1":       "john@example.com",
+		"user:2":       "jane@example.com",
+		"config:db":    "localhost:5432",
 		"config:cache": "redis://localhost:6379",
 	}
 
@@ -105,7 +105,7 @@ func TestConcurrentDatabaseAccess(t *testing.T) {
 	// Verify final state
 	stats, err := testDB.DB.Stats()
 	testutils.AssertNoError(t, err, "Getting final stats")
-	
+
 	// Should have some data (exact count may vary due to key overwrites)
 	testutils.AssertTrue(t, stats.KeyCount > 0, "Should have some keys after concurrent operations")
 }
@@ -116,7 +116,7 @@ func TestLargeDataOperations(t *testing.T) {
 	defer testDB.Close()
 
 	generator := testutils.NewTestDataGenerator(42)
-	
+
 	// Test with 1000 key-value pairs
 	const dataSize = 1000
 	testData := generator.GenerateKeyValuePairs(dataSize)
@@ -199,7 +199,7 @@ func TestDatabaseConfiguration(t *testing.T) {
 	for _, tc := range configs {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.config.Path = "config-test-" + tc.name + ".db"
-			
+
 			db, err := api.Open(tc.config.Path, tc.config)
 			testutils.AssertNoError(t, err, "Opening database with "+tc.name+" config")
 			defer db.Close()

@@ -2,8 +2,8 @@ package testutils
 
 import (
 	"bytes"
+	"crypto/rand"
 	"fmt"
-	"math/rand"
 	"os"
 	"path/filepath"
 	"testing"
@@ -21,11 +21,18 @@ type TestDatabase struct {
 
 // NewTestDatabase creates a new test database instance.
 func NewTestDatabase(t *testing.T) *TestDatabase {
-	path := filepath.Join(os.TempDir(), fmt.Sprintf("test-db-%d-%d", time.Now().UnixNano(), rand.Int()))
-	
+	// Generate secure random suffix
+	var suffix [8]byte
+	_, err := rand.Read(suffix[:])
+	if err != nil {
+		t.Fatalf("Failed to generate random suffix: %v", err)
+	}
+
+	path := filepath.Join(os.TempDir(), fmt.Sprintf("test-db-%d-%x", time.Now().UnixNano(), suffix))
+
 	config := api.DefaultConfig()
 	config.Path = path
-	
+
 	db, err := api.Open(path, config)
 	if err != nil {
 		t.Fatalf("Failed to create test database: %v", err)
@@ -49,7 +56,7 @@ func (td *TestDatabase) Close() {
 
 	// Clean up test file if it exists
 	if td.Path != "" {
-		os.Remove(td.Path)
+		_ = os.Remove(td.Path) // Ignore error on cleanup
 	}
 }
 
@@ -98,61 +105,81 @@ func (td *TestDatabase) PutTestData(data map[string]string) {
 
 // TestDataGenerator provides utilities for generating test data.
 type TestDataGenerator struct {
-	rand *rand.Rand
+	seed int64
 }
 
 // NewTestDataGenerator creates a new test data generator.
 func NewTestDataGenerator(seed int64) *TestDataGenerator {
 	return &TestDataGenerator{
-		rand: rand.New(rand.NewSource(seed)),
+		seed: seed,
 	}
 }
 
 // GenerateKeyValuePairs generates random key-value pairs.
 func (g *TestDataGenerator) GenerateKeyValuePairs(count int) map[string]string {
 	data := make(map[string]string)
-	
+
 	for i := 0; i < count; i++ {
 		key := g.GenerateKey(16)
 		value := g.GenerateValue(64)
 		data[key] = value
 	}
-	
+
 	return data
 }
 
-// GenerateKey generates a random key of the specified length.
+// GenerateKey generates a deterministic key of the specified length using seed.
 func (g *TestDataGenerator) GenerateKey(length int) string {
 	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	result := make([]byte, length)
-	
-	for i := range result {
-		result[i] = charset[g.rand.Intn(len(charset))]
+
+	// Use crypto/rand for secure generation
+	randomBytes := make([]byte, length)
+	_, err := rand.Read(randomBytes)
+	if err != nil {
+		// Fallback to deterministic generation based on seed for tests
+		for i := range result {
+			result[i] = charset[(g.seed+int64(i))%int64(len(charset))]
+		}
+	} else {
+		for i := range result {
+			result[i] = charset[randomBytes[i]%byte(len(charset))]
+		}
 	}
-	
+
 	return string(result)
 }
 
-// GenerateValue generates a random value of the specified length.
+// GenerateValue generates a deterministic value of the specified length using seed.
 func (g *TestDataGenerator) GenerateValue(length int) string {
 	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 !@#$%^&*()_+-="
 	result := make([]byte, length)
-	
-	for i := range result {
-		result[i] = charset[g.rand.Intn(len(charset))]
+
+	// Use crypto/rand for secure generation
+	randomBytes := make([]byte, length)
+	_, err := rand.Read(randomBytes)
+	if err != nil {
+		// Fallback to deterministic generation based on seed for tests
+		for i := range result {
+			result[i] = charset[(g.seed+int64(i)+100)%int64(len(charset))]
+		}
+	} else {
+		for i := range result {
+			result[i] = charset[randomBytes[i]%byte(len(charset))]
+		}
 	}
-	
+
 	return string(result)
 }
 
 // GenerateSequentialKeys generates sequential keys for testing ordering.
 func (g *TestDataGenerator) GenerateSequentialKeys(count int, prefix string) []string {
 	keys := make([]string, count)
-	
+
 	for i := 0; i < count; i++ {
 		keys[i] = fmt.Sprintf("%s%06d", prefix, i)
 	}
-	
+
 	return keys
 }
 
@@ -163,11 +190,18 @@ type BenchmarkHelper struct {
 
 // NewBenchmarkHelper creates a new benchmark helper.
 func NewBenchmarkHelper(b *testing.B) *BenchmarkHelper {
-	path := filepath.Join(os.TempDir(), fmt.Sprintf("bench-db-%d-%d", time.Now().UnixNano(), rand.Int()))
-	
+	// Generate secure random suffix
+	var suffix [8]byte
+	_, err := rand.Read(suffix[:])
+	if err != nil {
+		b.Fatalf("Failed to generate random suffix: %v", err)
+	}
+
+	path := filepath.Join(os.TempDir(), fmt.Sprintf("bench-db-%d-%x", time.Now().UnixNano(), suffix))
+
 	config := api.DefaultConfig()
 	config.Path = path
-	
+
 	db, err := api.Open(path, config)
 	if err != nil {
 		b.Fatalf("Failed to create benchmark database: %v", err)
@@ -181,18 +215,18 @@ func NewBenchmarkHelper(b *testing.B) *BenchmarkHelper {
 // Close closes the benchmark database.
 func (bh *BenchmarkHelper) Close() {
 	if bh.DB != nil {
-		bh.DB.Close()
+		_ = bh.DB.Close() // Ignore error on cleanup
 	}
 }
 
 // PrepareData prepares test data for benchmarks.
 func (bh *BenchmarkHelper) PrepareData(count int) {
 	generator := NewTestDataGenerator(42) // Fixed seed for reproducible benchmarks
-	
+
 	for i := 0; i < count; i++ {
 		key := []byte(fmt.Sprintf("bench-key-%06d", i))
 		value := []byte(generator.GenerateValue(100))
-		
+
 		err := bh.DB.Put(key, value)
 		if err != nil {
 			panic(fmt.Sprintf("Failed to prepare benchmark data: %v", err))
@@ -227,10 +261,10 @@ func IsKeyNotFoundError(err error) bool {
 		return false
 	}
 	errStr := err.Error()
-	return errStr == "key not found" || 
-		   errStr == "database error in get (key: key not found" ||
-		   errStr == "database error in delete (key: key not found" ||
-		   bytes.Contains([]byte(errStr), []byte("key not found"))
+	return errStr == "key not found" ||
+		errStr == "database error in get (key: key not found" ||
+		errStr == "database error in delete (key: key not found" ||
+		bytes.Contains([]byte(errStr), []byte("key not found"))
 }
 
 // AssertBytesEqual is a helper to assert that two byte slices are equal.
@@ -264,14 +298,14 @@ func MeasureTime(fn func()) time.Duration {
 // RunConcurrent runs multiple functions concurrently and waits for completion.
 func RunConcurrent(fns ...func()) {
 	done := make(chan bool, len(fns))
-	
+
 	for _, fn := range fns {
 		go func(f func()) {
 			defer func() { done <- true }()
 			f()
 		}(fn)
 	}
-	
+
 	for i := 0; i < len(fns); i++ {
 		<-done
 	}

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/romel/go-database/test/utils"
+	testutils "github.com/romel/go-database/test/utils"
 )
 
 // BenchmarkDatabaseOperations benchmarks basic database operations.
@@ -27,7 +27,7 @@ func BenchmarkDatabaseOperations(b *testing.B) {
 		b.Run(bm.name, func(b *testing.B) {
 			helper := testutils.NewBenchmarkHelper(b)
 			defer helper.Close()
-			
+
 			bm.fn(b, helper)
 		})
 	}
@@ -49,7 +49,7 @@ func benchmarkPutSingle(b *testing.B, helper *testutils.BenchmarkHelper) {
 func benchmarkPutBatch100(b *testing.B, helper *testutils.BenchmarkHelper) {
 	keys := make([][]byte, 100)
 	values := make([][]byte, 100)
-	
+
 	for i := 0; i < 100; i++ {
 		keys[i] = []byte(fmt.Sprintf("batch-key-%03d", i))
 		values[i] = []byte(fmt.Sprintf("batch-value-%03d-with-some-data", i))
@@ -69,7 +69,7 @@ func benchmarkPutBatch100(b *testing.B, helper *testutils.BenchmarkHelper) {
 func benchmarkPutBatch1000(b *testing.B, helper *testutils.BenchmarkHelper) {
 	keys := make([][]byte, 1000)
 	values := make([][]byte, 1000)
-	
+
 	for i := 0; i < 1000; i++ {
 		keys[i] = []byte(fmt.Sprintf("large-batch-key-%04d", i))
 		values[i] = []byte(fmt.Sprintf("large-batch-value-%04d-with-more-substantial-data", i))
@@ -131,13 +131,13 @@ func benchmarkDeleteSingle(b *testing.B, helper *testutils.BenchmarkHelper) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		key := []byte(fmt.Sprintf("delete-key-%d", i))
-		
+
 		// Setup
 		err := helper.DB.Put(key, value)
 		if err != nil {
 			b.Fatalf("Setup Put failed: %v", err)
 		}
-		
+
 		// Benchmark delete
 		err = helper.DB.Delete(key)
 		if err != nil {
@@ -220,12 +220,12 @@ func BenchmarkConcurrentOperations(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
 			key := []byte(fmt.Sprintf("concurrent-key-%d", b.N))
-			
+
 			err := helper.DB.Put(key, value)
 			if err != nil {
 				b.Fatalf("Concurrent Put failed: %v", err)
 			}
-			
+
 			_, err = helper.DB.Get(key)
 			if err != nil {
 				b.Fatalf("Concurrent Get failed: %v", err)
@@ -260,7 +260,7 @@ func BenchmarkMemoryUsage(b *testing.B) {
 				for j := 0; j < bm.count; j++ {
 					key := []byte(generator.GenerateKey(bm.keySize))
 					value := []byte(generator.GenerateValue(bm.valueSize))
-					
+
 					err := helper.DB.Put(key, value)
 					if err != nil {
 						b.Fatalf("Put failed: %v", err)

@@ -8,16 +8,16 @@ import (
 type MemoryIterator struct {
 	// keys holds the sorted keys for iteration
 	keys []string
-	
+
 	// data holds a snapshot of the key-value pairs
 	data map[string][]byte
-	
+
 	// position tracks the current position in the keys slice
 	position int
-	
+
 	// closed indicates if the iterator has been closed
 	closed bool
-	
+
 	// err holds any error encountered during iteration
 	err error
 }
@@ -27,7 +27,7 @@ func (it *MemoryIterator) Valid() bool {
 	if it.closed || it.err != nil {
 		return false
 	}
-	
+
 	return it.position >= 0 && it.position < len(it.keys)
 }
 
@@ -37,7 +37,7 @@ func (it *MemoryIterator) Next() bool {
 		it.err = utils.ErrIteratorClosed
 		return false
 	}
-	
+
 	it.position++
 	return it.Valid()
 }
@@ -47,7 +47,7 @@ func (it *MemoryIterator) Key() []byte {
 	if !it.Valid() {
 		return nil
 	}
-	
+
 	return []byte(it.keys[it.position])
 }
 
@@ -56,14 +56,14 @@ func (it *MemoryIterator) Value() []byte {
 	if !it.Valid() {
 		return nil
 	}
-	
+
 	key := it.keys[it.position]
 	value, exists := it.data[key]
 	if !exists {
 		it.err = utils.ErrKeyNotFound
 		return nil
 	}
-	
+
 	// Return a copy to prevent external modification
 	result := make([]byte, len(value))
 	copy(result, value)
@@ -76,9 +76,9 @@ func (it *MemoryIterator) Seek(target []byte) {
 		it.err = utils.ErrIteratorClosed
 		return
 	}
-	
+
 	targetStr := string(target)
-	
+
 	// Binary search for the first key >= target
 	left, right := 0, len(it.keys)
 	for left < right {
@@ -89,7 +89,7 @@ func (it *MemoryIterator) Seek(target []byte) {
 			right = mid
 		}
 	}
-	
+
 	it.position = left
 	if it.position >= len(it.keys) {
 		// No key found >= target, position at end
@@ -103,7 +103,7 @@ func (it *MemoryIterator) SeekToFirst() {
 		it.err = utils.ErrIteratorClosed
 		return
 	}
-	
+
 	it.position = 0
 	if len(it.keys) == 0 {
 		it.position = -1
@@ -116,7 +116,7 @@ func (it *MemoryIterator) SeekToLast() {
 		it.err = utils.ErrIteratorClosed
 		return
 	}
-	
+
 	it.position = len(it.keys) - 1
 }
 
@@ -130,11 +130,11 @@ func (it *MemoryIterator) Close() error {
 	if it.closed {
 		return utils.ErrIteratorClosed
 	}
-	
+
 	it.closed = true
 	it.keys = nil
 	it.data = nil
 	it.err = nil
-	
+
 	return nil
 }

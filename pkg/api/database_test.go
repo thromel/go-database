@@ -2,16 +2,19 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"testing"
 
 	"github.com/romel/go-database/pkg/utils"
 )
 
+const testDBPath = "test.db"
+
 func TestDatabase_Open(t *testing.T) {
 	config := DefaultConfig()
-	config.Path = "test.db"
+	config.Path = testDBPath
 
-	db, err := Open("test.db", config)
+	db, err := Open(testDBPath, config)
 	if err != nil {
 		t.Fatalf("Open failed: %v", err)
 	}
@@ -24,13 +27,13 @@ func TestDatabase_Open(t *testing.T) {
 	}
 
 	// Verify config is set
-	if impl.GetConfig().Path != "test.db" {
-		t.Errorf("Expected path 'test.db', got %s", impl.GetConfig().Path)
+	if impl.GetConfig().Path != testDBPath {
+		t.Errorf("Expected path %s, got %s", testDBPath, impl.GetConfig().Path)
 	}
 }
 
 func TestDatabase_OpenWithNilConfig(t *testing.T) {
-	db, err := Open("test.db", nil)
+	db, err := Open(testDBPath, nil)
 	if err != nil {
 		t.Fatalf("Open with nil config failed: %v", err)
 	}
@@ -41,9 +44,10 @@ func TestDatabase_OpenWithNilConfig(t *testing.T) {
 	config := impl.GetConfig()
 	if config == nil {
 		t.Error("Config should not be nil")
+		return
 	}
-	if config.Path != "test.db" {
-		t.Errorf("Expected path 'test.db', got %s", config.Path)
+	if config.Path != testDBPath {
+		t.Errorf("Expected path %s, got %s", testDBPath, config.Path)
 	}
 }
 
@@ -225,7 +229,7 @@ func TestDatabase_TransactionsNotImplemented(t *testing.T) {
 		t.Error("Expected error for Begin() - transactions not implemented yet")
 	}
 
-	_, err = db.BeginWithContext(nil)
+	_, err = db.BeginWithContext(context.TODO())
 	if err == nil {
 		t.Error("Expected error for BeginWithContext() - transactions not implemented yet")
 	}

@@ -1,3 +1,6 @@
+// Package transaction provides ACID transaction management for the database engine.
+// It includes support for different isolation levels, deadlock detection, and
+// automatic retry policies for handling transaction conflicts.
 package transaction
 
 import (
@@ -33,7 +36,7 @@ type Transaction interface {
 	Rollback() error
 
 	// ID returns the unique identifier for this transaction.
-	ID() TransactionID
+	ID() ID
 
 	// IsReadOnly returns true if this transaction only performs read operations.
 	IsReadOnly() bool
@@ -46,11 +49,11 @@ type Transaction interface {
 	SetDeadline(deadline time.Time) error
 }
 
-// TransactionID represents a unique identifier for a transaction.
-type TransactionID uint64
+// ID represents a unique identifier for a transaction.
+type ID uint64
 
-// TransactionManager handles the lifecycle and coordination of transactions.
-type TransactionManager interface {
+// Manager handles the lifecycle and coordination of transactions.
+type Manager interface {
 	// Begin starts a new transaction with default options.
 	Begin() (Transaction, error)
 
@@ -61,7 +64,7 @@ type TransactionManager interface {
 	BeginWithOptions(opts *TransactionOptions) (Transaction, error)
 
 	// GetTransaction retrieves an active transaction by its ID.
-	GetTransaction(id TransactionID) (Transaction, error)
+	GetTransaction(id ID) (Transaction, error)
 
 	// ActiveTransactions returns the number of currently active transactions.
 	ActiveTransactions() int64

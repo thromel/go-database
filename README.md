@@ -1,5 +1,11 @@
 # Go Database Engine
 
+[![CI](https://github.com/thromel/go-database/workflows/CI/badge.svg)](https://github.com/thromel/go-database/actions)
+[![codecov](https://codecov.io/gh/thromel/go-database/branch/main/graph/badge.svg)](https://codecov.io/gh/thromel/go-database)
+[![Go Report Card](https://goreportcard.com/badge/github.com/thromel/go-database)](https://goreportcard.com/report/github.com/thromel/go-database)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/thromel/go-database)](https://github.com/thromel/go-database)
+
 A complete, production-ready database engine built from scratch in Go. This project implements core database concepts including B+ trees, ACID transactions, SQL query processing, and crash recovery.
 
 ## 🚀 Project Status
@@ -163,7 +169,49 @@ make coverage
 - **Test Utilities**: Shared testing helpers (`test/utils/`)
 
 ### Coverage
-Current test coverage: **>80%** across all packages
+Current test coverage: **80.7%** across all packages
+
+![Coverage](https://codecov.io/gh/thromel/go-database/branch/main/graphs/tree.svg)
+
+Package-specific coverage:
+- **API Package**: **85.1%** coverage
+- **Storage Package**: **77.7%** coverage  
+- **Integration Tests**: Full lifecycle coverage
+- **Performance Tests**: Comprehensive benchmarks
+
+```bash
+# Generate detailed coverage report
+make coverage-detailed
+
+# View coverage in browser
+open coverage.html
+```
+
+#### Setting Up Coverage Badges (For Repository Owner)
+
+1. **Codecov Setup**:
+   - Visit https://codecov.io and sign in with GitHub
+   - Add your repository to Codecov
+   - Copy the repository upload token
+
+2. **GitHub Secrets**:
+   - Go to: Repository Settings → Secrets and variables → Actions
+   - Add new secret: `CODECOV_TOKEN` with your Codecov token
+
+3. **CI Configuration**:
+   ```yaml
+   - name: Generate test coverage
+     run: go test -coverprofile=coverage.txt ./...
+   
+   - name: Upload coverage reports to Codecov
+     uses: codecov/codecov-action@v5
+     with:
+       token: ${{ secrets.CODECOV_TOKEN }}
+   ```
+
+4. **Automatic Updates**:
+   - Coverage badges update automatically after each CI run
+   - Detailed coverage reports available on Codecov dashboard
 
 ## 📊 Performance
 
