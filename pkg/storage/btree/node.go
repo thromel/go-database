@@ -424,7 +424,8 @@ func (bt *BPlusTree) serializeNode(node *BPlusTreeNode) ([]byte, error) {
 	if len(node.keys) > int(^uint32(0)) {
 		return nil, errors.New("too many keys to serialize")
 	}
-	binary.LittleEndian.PutUint32(numKeysBytes, uint32(len(node.keys)))
+	numKeys := uint32(len(node.keys)) // #nosec G115 - bounds checked above
+	binary.LittleEndian.PutUint32(numKeysBytes, numKeys)
 	buffer = append(buffer, numKeysBytes...)
 
 	// Write keys
@@ -434,7 +435,8 @@ func (bt *BPlusTree) serializeNode(node *BPlusTreeNode) ([]byte, error) {
 		if len(key) > int(^uint32(0)) {
 			return nil, errors.New("key too large to serialize")
 		}
-		binary.LittleEndian.PutUint32(keyLenBytes, uint32(len(key)))
+		keyLen := uint32(len(key)) // #nosec G115 - bounds checked above
+		binary.LittleEndian.PutUint32(keyLenBytes, keyLen)
 		buffer = append(buffer, keyLenBytes...)
 
 		// Write key data
@@ -449,7 +451,8 @@ func (bt *BPlusTree) serializeNode(node *BPlusTreeNode) ([]byte, error) {
 			if len(value) > int(^uint32(0)) {
 				return nil, errors.New("value too large to serialize")
 			}
-			binary.LittleEndian.PutUint32(valueLenBytes, uint32(len(value)))
+			valueLen := uint32(len(value)) // #nosec G115 - bounds checked above
+			binary.LittleEndian.PutUint32(valueLenBytes, valueLen)
 			buffer = append(buffer, valueLenBytes...)
 
 			// Write value data

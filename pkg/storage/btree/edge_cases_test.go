@@ -12,30 +12,30 @@ import (
 func TestBPlusTreeEdgeCases(t *testing.T) {
 	pageManager := page.NewManager()
 	config := DefaultConfig()
-	
+
 	tree, err := NewBPlusTree(pageManager, config)
 	if err != nil {
 		t.Fatalf("Failed to create B+ tree: %v", err)
 	}
-	
+
 	// Test Put with nil key (should be rejected by validation)
 	err = tree.Put(nil, []byte("value"))
 	if err == nil {
 		t.Error("Expected error for nil key")
 	}
-	
+
 	// Test Get with nil key
 	_, err = tree.Get(nil)
 	if err == nil {
 		t.Error("Expected error for nil key")
 	}
-	
+
 	// Test Delete with nil key
 	err = tree.Delete(nil)
 	if err == nil {
 		t.Error("Expected error for nil key")
 	}
-	
+
 	// Test Exists with nil key
 	_, err = tree.Exists(nil)
 	if err == nil {
@@ -47,36 +47,36 @@ func TestBPlusTreeEdgeCases(t *testing.T) {
 func TestSerializationEdgeCases(t *testing.T) {
 	pageManager := page.NewManager()
 	config := DefaultConfig()
-	
+
 	tree, err := NewBPlusTree(pageManager, config)
 	if err != nil {
 		t.Fatalf("Failed to create B+ tree: %v", err)
 	}
-	
+
 	// Test serialization of nil node
 	_, err = tree.serializeNode(nil)
 	if err == nil {
 		t.Error("Expected error when serializing nil node")
 	}
-	
+
 	// Test deserialization of nil page
 	_, err = tree.deserializeNode(nil)
 	if err == nil {
 		t.Error("Expected error when deserializing nil page")
 	}
-	
+
 	// Test deserialization with insufficient data
 	emptyPage, err := pageManager.AllocatePage(page.PageTypeLeaf)
 	if err != nil {
 		t.Fatalf("Failed to allocate page: %v", err)
 	}
-	
+
 	// Clear page data to simulate corrupted/insufficient data
 	data := emptyPage.Data()
 	for i := range data {
 		data[i] = 0
 	}
-	
+
 	_, err = tree.deserializeNode(emptyPage)
 	if err == nil {
 		t.Log("Note: Deserialization may succeed with zero data as it represents valid empty node")
@@ -94,12 +94,12 @@ func TestTreeCorruptionHandling(t *testing.T) {
 		MaxKeySize:      64,
 		MaxValueSize:    128,
 	}
-	
+
 	tree, err := NewBPlusTree(pageManager, config)
 	if err != nil {
 		t.Fatalf("Failed to create B+ tree: %v", err)
 	}
-	
+
 	// Insert some data to create a tree structure
 	for i := 0; i < 10; i++ {
 		key := []byte(fmt.Sprintf("key%d", i))
@@ -109,14 +109,14 @@ func TestTreeCorruptionHandling(t *testing.T) {
 			t.Fatalf("Failed to put key: %v", err)
 		}
 	}
-	
+
 	// Test accessing a child index that's out of bounds
 	// This is hard to simulate directly, but we can test the error condition
 	// by trying to access non-existent keys after tree height increases
-	
+
 	stats := tree.Stats()
 	originalHeight := stats.Height
-	
+
 	// Verify the tree has some structure
 	if originalHeight < 0 {
 		t.Errorf("Expected non-negative tree height, got %d", originalHeight)
@@ -132,34 +132,34 @@ func TestLargeKeyValues(t *testing.T) {
 		MaxKeySize:      100,
 		MaxValueSize:    200,
 	}
-	
+
 	tree, err := NewBPlusTree(pageManager, config)
 	if err != nil {
 		t.Fatalf("Failed to create B+ tree: %v", err)
 	}
-	
+
 	// Test maximum size key and value
 	maxKey := make([]byte, config.MaxKeySize)
 	for i := range maxKey {
 		maxKey[i] = byte('A' + (i % 26))
 	}
-	
+
 	maxValue := make([]byte, config.MaxValueSize)
 	for i := range maxValue {
 		maxValue[i] = byte('0' + (i % 10))
 	}
-	
+
 	err = tree.Put(maxKey, maxValue)
 	if err != nil {
 		t.Errorf("Failed to put max size key-value: %v", err)
 	}
-	
+
 	// Retrieve and verify
 	retrievedValue, err := tree.Get(maxKey)
 	if err != nil {
 		t.Errorf("Failed to get max size key: %v", err)
 	}
-	
+
 	if !bytes.Equal(retrievedValue, maxValue) {
 		t.Error("Retrieved value doesn't match original max value")
 	}
@@ -169,12 +169,12 @@ func TestLargeKeyValues(t *testing.T) {
 func TestConcurrentOperations(t *testing.T) {
 	pageManager := page.NewManager()
 	config := DefaultConfig()
-	
+
 	tree, err := NewBPlusTree(pageManager, config)
 	if err != nil {
 		t.Fatalf("Failed to create B+ tree: %v", err)
 	}
-	
+
 	// Insert initial data
 	for i := 0; i < 10; i++ {
 		key := []byte(fmt.Sprintf("key%d", i))
@@ -184,10 +184,10 @@ func TestConcurrentOperations(t *testing.T) {
 			t.Fatalf("Failed to put initial key: %v", err)
 		}
 	}
-	
+
 	// Test concurrent reads (should not cause issues with RLock)
 	done := make(chan bool, 3)
-	
+
 	// Reader goroutine 1
 	go func() {
 		for i := 0; i < 5; i++ {
@@ -199,7 +199,7 @@ func TestConcurrentOperations(t *testing.T) {
 		}
 		done <- true
 	}()
-	
+
 	// Reader goroutine 2
 	go func() {
 		for i := 5; i < 10; i++ {
@@ -213,7 +213,7 @@ func TestConcurrentOperations(t *testing.T) {
 		}
 		done <- true
 	}()
-	
+
 	// Stats reader
 	go func() {
 		for i := 0; i < 3; i++ {
@@ -224,7 +224,7 @@ func TestConcurrentOperations(t *testing.T) {
 		}
 		done <- true
 	}()
-	
+
 	// Wait for all readers to complete
 	for i := 0; i < 3; i++ {
 		<-done
@@ -242,7 +242,7 @@ func TestNodeFindMethods(t *testing.T) {
 	if value != nil {
 		t.Error("Should return nil value for empty leaf")
 	}
-	
+
 	// Test findValue with internal node (should return false)
 	internal := newInternalNode()
 	internal.keys = [][]byte{[]byte("key1")}
@@ -250,23 +250,23 @@ func TestNodeFindMethods(t *testing.T) {
 	if found {
 		t.Error("Should not find value in internal node")
 	}
-	
+
 	// Test findChildIndex with leaf node (should return -1)
 	leaf := newLeafNode()
 	index := leaf.findChildIndex([]byte("anykey"))
 	if index != -1 {
 		t.Error("Should return -1 for leaf node child index")
 	}
-	
+
 	// Test findChildIndex with various key positions
 	internal.children = []page.PageID{1, 2}
-	
+
 	// Key less than all keys should return 0
 	index = internal.findChildIndex([]byte("key0"))
 	if index != 0 {
 		t.Errorf("Expected index 0 for key less than all, got %d", index)
 	}
-	
+
 	// Key greater than all keys should return last index
 	index = internal.findChildIndex([]byte("key9"))
 	if index != len(internal.keys) {
@@ -279,7 +279,7 @@ func TestSplitEdgeCases(t *testing.T) {
 	// Test splitLeaf with internal node (should return nil)
 	internal := newInternalNode()
 	internal.keys = [][]byte{[]byte("key1"), []byte("key2")}
-	
+
 	newNode, promoteKey := internal.splitLeaf(4)
 	if newNode != nil {
 		t.Error("splitLeaf should return nil for internal node")
@@ -287,11 +287,11 @@ func TestSplitEdgeCases(t *testing.T) {
 	if promoteKey != nil {
 		t.Error("splitLeaf should return nil promote key for internal node")
 	}
-	
+
 	// Test splitInternal with leaf node (should return nil)
 	leaf := newLeafNode()
 	leaf.keys = [][]byte{[]byte("key1"), []byte("key2")}
-	
+
 	newNode, promoteKey = leaf.splitInternal(4)
 	if newNode != nil {
 		t.Error("splitInternal should return nil for leaf node")
@@ -309,23 +309,23 @@ func TestInsertInLeafEdgeCases(t *testing.T) {
 	if needsSplit {
 		t.Error("insertInLeaf should return false for internal node")
 	}
-	
+
 	// Test insertInInternal with leaf node (should return false)
 	leaf := newLeafNode()
 	needsSplit = leaf.insertInInternal([]byte("key"), page.PageID(1), 4)
 	if needsSplit {
 		t.Error("insertInInternal should return false for leaf node")
 	}
-	
+
 	// Test key update in leaf (should not need split)
 	leaf.keys = [][]byte{[]byte("existingkey")}
 	leaf.values = [][]byte{[]byte("oldvalue")}
-	
+
 	needsSplit = leaf.insertInLeaf([]byte("existingkey"), []byte("newvalue"), 4)
 	if needsSplit {
 		t.Error("Updating existing key should not need split")
 	}
-	
+
 	if string(leaf.values[0]) != "newvalue" {
 		t.Error("Key update should change the value")
 	}
@@ -336,22 +336,22 @@ func TestDeleteEdgeCases(t *testing.T) {
 	// Test deleteFromLeaf with internal node (should return false)
 	internal := newInternalNode()
 	internal.keys = [][]byte{[]byte("key1")}
-	
+
 	underflow := internal.deleteFromLeaf([]byte("key1"), 1)
 	if underflow {
 		t.Error("deleteFromLeaf should return false for internal node")
 	}
-	
+
 	// Test deletion of non-existent key
 	leaf := newLeafNode()
 	leaf.keys = [][]byte{[]byte("key1"), []byte("key3")}
 	leaf.values = [][]byte{[]byte("val1"), []byte("val3")}
-	
+
 	underflow = leaf.deleteFromLeaf([]byte("key2"), 1)
 	if underflow {
 		t.Error("Deleting non-existent key should not cause underflow")
 	}
-	
+
 	if len(leaf.keys) != 2 {
 		t.Error("Key count should not change when deleting non-existent key")
 	}
@@ -362,19 +362,19 @@ func TestBorrowFromRightEdgeCase(t *testing.T) {
 	node := newLeafNode()
 	node.keys = [][]byte{[]byte("key1")}
 	node.values = [][]byte{[]byte("val1")}
-	
+
 	rightSibling := newLeafNode()
 	rightSibling.keys = [][]byte{[]byte("key2")}
 	rightSibling.values = [][]byte{[]byte("val2")}
-	
+
 	// Borrow the only key from right sibling
 	newSeparator := node.borrowFromRight(rightSibling, []byte("separator"))
-	
+
 	// Right sibling should be empty, so newSeparator should be nil
 	if len(rightSibling.keys) != 0 {
 		t.Error("Right sibling should be empty after borrowing its only key")
 	}
-	
+
 	if newSeparator != nil {
 		t.Error("Should return nil separator when right sibling becomes empty")
 	}
