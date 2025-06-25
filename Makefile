@@ -38,6 +38,32 @@ coverage:
 	@echo "Running tests with coverage..."
 	@go test -coverprofile=coverage.out ./...
 	@go tool cover -html=coverage.out -o coverage.html
+	@go tool cover -func=coverage.out
+	@echo "Coverage report generated: coverage.html"
+
+# Run all tests including integration and performance
+test-all:
+	@echo "Running all tests..."
+	@go test -v ./pkg/...
+	@go test -v ./test/integration/...
+	@go test -v ./test/performance/... -short
+
+# Run integration tests
+test-integration:
+	@echo "Running integration tests..."
+	@go test -v ./test/integration/...
+
+# Run performance tests  
+test-performance:
+	@echo "Running performance tests..."
+	@go test -v ./test/performance/...
+
+# Run coverage for all packages
+coverage-all:
+	@echo "Running coverage for all packages..."
+	@go test -coverprofile=coverage.out ./pkg/... ./test/...
+	@go tool cover -html=coverage.out -o coverage.html
+	@go tool cover -func=coverage.out
 	@echo "Coverage report generated: coverage.html"
 
 # Lint code
