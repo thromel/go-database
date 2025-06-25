@@ -79,7 +79,7 @@ func TestMemoryIterator_ClosedIterator(t *testing.T) {
 	defer engine.Close()
 
 	// Add test data
-	engine.Put([]byte("key"), []byte("value"))
+	_ = engine.Put([]byte("key"), []byte("value"))
 
 	iter := engine.NewIterator(nil, nil)
 
@@ -130,8 +130,8 @@ func TestMemoryIterator_EdgeCases(t *testing.T) {
 	defer engine.Close()
 
 	// Add test data
-	engine.Put([]byte("key1"), []byte("value1"))
-	engine.Put([]byte("key2"), []byte("value2"))
+	_ = engine.Put([]byte("key1"), []byte("value1"))
+	_ = engine.Put([]byte("key2"), []byte("value2"))
 
 	iter := engine.NewIterator(nil, nil)
 	defer iter.Close()
