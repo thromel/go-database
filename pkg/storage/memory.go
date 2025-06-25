@@ -123,6 +123,10 @@ func (m *MemoryEngine) NewIterator(start, end []byte) Iterator {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
+	if m.closed {
+		return nil
+	}
+
 	// Create a snapshot of keys for consistent iteration
 	keys := make([]string, 0, len(m.data))
 	for k := range m.data {

@@ -246,7 +246,7 @@ func TestNodeFindMethods(t *testing.T) {
 	// Test findValue with internal node (should return false)
 	internal := newInternalNode()
 	internal.keys = [][]byte{[]byte("key1")}
-	value, found = internal.findValue([]byte("key1"))
+	_, found = internal.findValue([]byte("key1"))
 	if found {
 		t.Error("Should not find value in internal node")
 	}

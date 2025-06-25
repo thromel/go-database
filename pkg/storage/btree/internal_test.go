@@ -132,6 +132,7 @@ func TestInternalNodeMethods(t *testing.T) {
 	newNode, promoteKey := node.splitInternal(4)
 	if newNode == nil {
 		t.Error("Expected new node from split")
+		return
 	}
 	if promoteKey == nil {
 		t.Error("Expected promote key from split")
@@ -235,6 +236,9 @@ func TestUnderflowMethods(t *testing.T) {
 	if len(node.keys) != originalNodeKeys+1 {
 		t.Error("Node should have one more key after borrowing")
 	}
+	if newSeparator == nil {
+		t.Error("Should return new separator key")
+	}
 
 	// Test merge
 	originalNodeKeys = len(node.keys)
@@ -284,6 +288,9 @@ func TestInternalNodeBorrowingAndMerging(t *testing.T) {
 	}
 	if len(node.keys) != 3 {
 		t.Error("Node should have one more key after borrowing")
+	}
+	if newParentKey == nil {
+		t.Error("Should return new parent key")
 	}
 
 	// Test merge for internal nodes
