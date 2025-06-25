@@ -42,7 +42,7 @@ func NewTestDatabase(t *testing.T) *TestDatabase {
 func (td *TestDatabase) Close() {
 	if td.DB != nil {
 		err := td.DB.Close()
-		if err != nil {
+		if err != nil && err.Error() != "database is closed" {
 			td.t.Errorf("Failed to close test database: %v", err)
 		}
 	}

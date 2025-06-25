@@ -2,6 +2,7 @@ package integration
 
 import (
 	"testing"
+	"time"
 
 	"github.com/romel/go-database/pkg/api"
 	"github.com/romel/go-database/test/utils"
@@ -163,6 +164,14 @@ func TestDatabaseConfiguration(t *testing.T) {
 				Storage: api.StorageConfig{
 					PageSize: 8192, // Required field
 				},
+				Transaction: api.TransactionConfig{
+					MaxActiveTransactions: 1000, // Required field
+					TransactionTimeout:    30 * time.Second,
+				},
+				Performance: api.PerformanceConfig{
+					MaxConcurrentReads:  100, // Required field
+					MaxConcurrentWrites: 50,  // Required field
+				},
 			},
 		},
 		{
@@ -174,6 +183,14 @@ func TestDatabaseConfiguration(t *testing.T) {
 				},
 				Storage: api.StorageConfig{
 					PageSize: 8192, // Required field
+				},
+				Transaction: api.TransactionConfig{
+					MaxActiveTransactions: 1000, // Required field
+					TransactionTimeout:    30 * time.Second,
+				},
+				Performance: api.PerformanceConfig{
+					MaxConcurrentReads:  100, // Required field
+					MaxConcurrentWrites: 50,  // Required field
 				},
 			},
 		},
@@ -224,7 +241,10 @@ func TestErrorHandling(t *testing.T) {
 	testutils.AssertError(t, err, "Delete non-existent key should fail")
 
 	// Test operations after close
-	testDB.DB.Close()
+	err = testDB.DB.Close()
+	if err != nil {
+		t.Logf("First close returned error: %v", err)
+	}
 
 	_, err = testDB.DB.Get([]byte("key"))
 	testutils.AssertError(t, err, "Get after close should fail")
