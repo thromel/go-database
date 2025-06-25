@@ -63,3 +63,8 @@ config/development.yaml
 .env.local
 
 education/
+
+# Project documentation and planning (for AI agents)
+CLAUDE.md
+sprints/
+docs/
