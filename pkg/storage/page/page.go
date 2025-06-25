@@ -147,7 +147,7 @@ func (p *Page) Data() []byte {
 // Serialize writes the page to a byte slice.
 func (p *Page) Serialize() ([]byte, error) {
 	buf := make([]byte, PageSize)
-	
+
 	// Write header
 	binary.LittleEndian.PutUint32(buf[0:4], uint32(p.header.PageID))
 	buf[4] = byte(p.header.PageType)
@@ -157,14 +157,14 @@ func (p *Page) Serialize() ([]byte, error) {
 	binary.LittleEndian.PutUint16(buf[17:19], p.header.FreeSpacePtr)
 	binary.LittleEndian.PutUint32(buf[19:23], uint32(p.header.NextPage))
 	// Checksum is written at position 28-32 after calculation
-	
+
 	// Copy data
 	copy(buf[PageHeaderSize:], p.data[:])
-	
+
 	// Calculate and write checksum (excluding checksum field itself)
 	checksum := calculateChecksum(buf[:28], buf[32:])
 	binary.LittleEndian.PutUint32(buf[28:32], checksum)
-	
+
 	return buf, nil
 }
 
@@ -173,7 +173,7 @@ func (p *Page) Deserialize(buf []byte) error {
 	if len(buf) != PageSize {
 		return fmt.Errorf("invalid buffer size: expected %d, got %d", PageSize, len(buf))
 	}
-	
+
 	// Read header
 	p.header.PageID = PageID(binary.LittleEndian.Uint32(buf[0:4]))
 	p.header.PageType = PageType(buf[4])
@@ -183,16 +183,16 @@ func (p *Page) Deserialize(buf []byte) error {
 	p.header.FreeSpacePtr = binary.LittleEndian.Uint16(buf[17:19])
 	p.header.NextPage = PageID(binary.LittleEndian.Uint32(buf[19:23]))
 	p.header.Checksum = binary.LittleEndian.Uint32(buf[28:32])
-	
+
 	// Verify checksum
 	expectedChecksum := calculateChecksum(buf[:28], buf[32:])
 	if p.header.Checksum != expectedChecksum {
 		return fmt.Errorf("page checksum mismatch: expected %x, got %x", expectedChecksum, p.header.Checksum)
 	}
-	
+
 	// Copy data
 	copy(p.data[:], buf[PageHeaderSize:])
-	
+
 	return nil
 }
 
@@ -202,17 +202,17 @@ func (p *Page) IsValid() error {
 	if p.header.PageType > PageTypeOverflow {
 		return fmt.Errorf("invalid page type: %d", p.header.PageType)
 	}
-	
+
 	// Validate free space
 	if p.header.FreeSpace > PageSize-PageHeaderSize {
 		return fmt.Errorf("invalid free space: %d", p.header.FreeSpace)
 	}
-	
+
 	// Validate free space pointer
 	if p.header.FreeSpacePtr < PageHeaderSize || p.header.FreeSpacePtr > PageSize {
 		return fmt.Errorf("invalid free space pointer: %d", p.header.FreeSpacePtr)
 	}
-	
+
 	return nil
 }
 

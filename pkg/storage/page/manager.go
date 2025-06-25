@@ -10,19 +10,19 @@ import (
 type Manager struct {
 	// nextPageID is the next available page ID.
 	nextPageID atomic.Uint32
-	
+
 	// freeList contains IDs of free pages available for reuse.
 	freeList []PageID
-	
+
 	// freeListMu protects access to the free list.
 	freeListMu sync.Mutex
-	
+
 	// pageMap tracks allocated pages (for testing/debugging).
 	pageMap map[PageID]*Page
-	
+
 	// pageMapMu protects access to the page map.
 	pageMapMu sync.RWMutex
-	
+
 	// metaPage holds database metadata.
 	metaPage *Page
 }
@@ -33,12 +33,12 @@ func NewManager() *Manager {
 		freeList: make([]PageID, 0),
 		pageMap:  make(map[PageID]*Page),
 	}
-	
+
 	// Initialize with meta page at ID 0
 	m.nextPageID.Store(1)
 	m.metaPage = NewPage(0, PageTypeMeta)
 	m.pageMap[0] = m.metaPage
-	
+
 	return m
 }
 
@@ -51,34 +51,34 @@ func (m *Manager) AllocatePage(pageType PageType) (*Page, error) {
 		pageID := m.freeList[len(m.freeList)-1]
 		m.freeList = m.freeList[:len(m.freeList)-1]
 		m.freeListMu.Unlock()
-		
+
 		// Create page with reused ID
 		page := NewPage(pageID, pageType)
-		
+
 		// Track the page
 		m.pageMapMu.Lock()
 		m.pageMap[pageID] = page
 		m.pageMapMu.Unlock()
-		
+
 		return page, nil
 	}
 	m.freeListMu.Unlock()
-	
+
 	// Allocate new page ID
 	pageID := PageID(m.nextPageID.Add(1) - 1)
 	if pageID == InvalidPageID {
 		// Skip invalid page ID (0)
 		pageID = PageID(m.nextPageID.Add(1) - 1)
 	}
-	
+
 	// Create new page
 	page := NewPage(pageID, pageType)
-	
+
 	// Track the page
 	m.pageMapMu.Lock()
 	m.pageMap[pageID] = page
 	m.pageMapMu.Unlock()
-	
+
 	return page, nil
 }
 
@@ -87,11 +87,11 @@ func (m *Manager) DeallocatePage(pageID PageID) error {
 	if pageID == InvalidPageID {
 		return ErrInvalidPageID
 	}
-	
+
 	if pageID == 0 {
 		return fmt.Errorf("cannot deallocate meta page")
 	}
-	
+
 	// Remove from page map
 	m.pageMapMu.Lock()
 	page, exists := m.pageMap[pageID]
@@ -101,15 +101,15 @@ func (m *Manager) DeallocatePage(pageID PageID) error {
 	}
 	delete(m.pageMap, pageID)
 	m.pageMapMu.Unlock()
-	
+
 	// Mark as free
 	page.header.PageType = PageTypeFree
-	
+
 	// Add to free list
 	m.freeListMu.Lock()
 	m.freeList = append(m.freeList, pageID)
 	m.freeListMu.Unlock()
-	
+
 	return nil
 }
 
@@ -118,11 +118,11 @@ func (m *Manager) GetPage(pageID PageID) (*Page, error) {
 	m.pageMapMu.RLock()
 	page, exists := m.pageMap[pageID]
 	m.pageMapMu.RUnlock()
-	
+
 	if !exists {
 		return nil, fmt.Errorf("page %d not found", pageID)
 	}
-	
+
 	return page, nil
 }
 
@@ -165,12 +165,12 @@ func (m *Manager) GetStatistics() Statistics {
 	stats := Statistics{
 		PageTypeCounts: make(map[PageType]int),
 	}
-	
+
 	// Get free page count
 	m.freeListMu.Lock()
 	stats.FreePages = len(m.freeList)
 	m.freeListMu.Unlock()
-	
+
 	// Get allocated pages and type counts
 	m.pageMapMu.RLock()
 	stats.AllocatedPages = len(m.pageMap)
@@ -178,8 +178,8 @@ func (m *Manager) GetStatistics() Statistics {
 		stats.PageTypeCounts[page.Type()]++
 	}
 	m.pageMapMu.RUnlock()
-	
+
 	stats.NextPageID = PageID(m.nextPageID.Load())
-	
+
 	return stats
 }

@@ -13,8 +13,9 @@ var crc32Table = crc32.MakeTable(crc32.IEEE)
 // the checksum field itself in the page header.
 func calculateChecksum(data1, data2 []byte) uint32 {
 	h := crc32.New(crc32Table)
-	h.Write(data1)
-	h.Write(data2)
+	// Note: hash.Hash.Write() never returns an error per documentation
+	_, _ = h.Write(data1)
+	_, _ = h.Write(data2)
 	return h.Sum32()
 }
 
@@ -23,16 +24,16 @@ func VerifyChecksum(pageData []byte) error {
 	if len(pageData) != PageSize {
 		return ErrPageCorrupted
 	}
-	
+
 	// Extract stored checksum
 	storedChecksum := binary.LittleEndian.Uint32(pageData[28:32])
-	
+
 	// Calculate expected checksum (excluding checksum field)
 	expectedChecksum := calculateChecksum(pageData[:28], pageData[32:])
-	
+
 	if storedChecksum != expectedChecksum {
 		return ErrPageCorrupted
 	}
-	
+
 	return nil
 }
