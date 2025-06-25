@@ -60,9 +60,9 @@ func DefaultPersistentConfig() *PersistentConfig {
 	return &PersistentConfig{
 		FilePath:              "database.godb",
 		BufferPoolSize:        1024,
-		BTreeConfig:          btree.DefaultConfig(),
-		FileConfig:           file.DefaultConfig(),
-		SyncOnWrite:          true,
+		BTreeConfig:           btree.DefaultConfig(),
+		FileConfig:            file.DefaultConfig(),
+		SyncOnWrite:           true,
 		EnableIntegrityChecks: true,
 	}
 }
@@ -418,12 +418,12 @@ type ErrorIterator struct {
 	err error
 }
 
-func (ei *ErrorIterator) Valid() bool                { return false }
-func (ei *ErrorIterator) Next() bool                 { return false }
-func (ei *ErrorIterator) Key() []byte                { return nil }
-func (ei *ErrorIterator) Value() []byte              { return nil }
-func (ei *ErrorIterator) Seek(target []byte)         {}
-func (ei *ErrorIterator) SeekToFirst()               {}
-func (ei *ErrorIterator) SeekToLast()                {}
-func (ei *ErrorIterator) Error() error               { return ei.err }
-func (ei *ErrorIterator) Close() error               { return nil }
+func (ei *ErrorIterator) Valid() bool        { return false }
+func (ei *ErrorIterator) Next() bool         { return false }
+func (ei *ErrorIterator) Key() []byte        { return nil }
+func (ei *ErrorIterator) Value() []byte      { return nil }
+func (ei *ErrorIterator) Seek(target []byte) {}
+func (ei *ErrorIterator) SeekToFirst()       {}
+func (ei *ErrorIterator) SeekToLast()        {}
+func (ei *ErrorIterator) Error() error       { return ei.err }
+func (ei *ErrorIterator) Close() error       { return nil }

@@ -21,7 +21,7 @@ type PersistentPageManager struct {
 	mu sync.RWMutex
 
 	// Page mapping: in-memory page ID -> file page ID
-	pageMapping map[page.PageID]page.PageID
+	pageMapping    map[page.PageID]page.PageID
 	nextFilePageID page.PageID
 }
 
@@ -61,7 +61,7 @@ func (ppm *PersistentPageManager) AllocatePage(pageType page.PageType) (*page.Pa
 	if err := ppm.fileManager.WritePage(persistentPage); err != nil {
 		// Clean up on failure
 		delete(ppm.pageMapping, memPage.ID())
-		ppm.memoryPageManager.DeallocatePage(memPage.ID())
+		_ = ppm.memoryPageManager.DeallocatePage(memPage.ID()) // Ignore error during cleanup
 		return nil, fmt.Errorf("failed to write page to file: %w", err)
 	}
 

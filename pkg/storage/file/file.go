@@ -137,7 +137,7 @@ func NewFileManager(dbPath string, config *Config) (*FileManager, error) {
 
 	// Initialize file size and page count
 	if err := fm.updateFileSizeInfo(); err != nil {
-		fm.Close() // Clean up on failure
+		_ = fm.Close() // Clean up on failure
 		return nil, fmt.Errorf("failed to update file size info: %w", err)
 	}
 
@@ -156,8 +156,8 @@ func (fm *FileManager) acquireLock() error {
 
 	// Try to acquire an exclusive lock
 	if err := syscall.Flock(int(lockFile.Fd()), syscall.LOCK_EX|syscall.LOCK_NB); err != nil {
-		lockFile.Close()
-		os.Remove(fm.lockPath)
+		_ = lockFile.Close()
+		_ = os.Remove(fm.lockPath)
 		return fmt.Errorf("failed to acquire file lock: %w", err)
 	}
 
@@ -175,7 +175,7 @@ func (fm *FileManager) releaseLock() error {
 	_ = syscall.Flock(int(fm.lockFile.Fd()), syscall.LOCK_UN)
 
 	// Close and remove lock file
-	fm.lockFile.Close()
+	_ = fm.lockFile.Close()
 	fm.lockFile = nil
 
 	return os.Remove(fm.lockPath)
@@ -190,6 +190,7 @@ func (fm *FileManager) openFile(config *Config) error {
 		flags |= getDirectIOFlag()
 	}
 
+	// #nosec G304 - filePath is validated during FileManager creation
 	file, err := os.OpenFile(fm.filePath, flags, DefaultFileMode)
 	if err != nil {
 		return fmt.Errorf("failed to open file %s: %w", fm.filePath, err)
