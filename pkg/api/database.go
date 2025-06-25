@@ -3,7 +3,7 @@ package api
 import (
 	"context"
 
-	"github.com/romel/go-database/pkg/transaction"
+	"github.com/thromel/go-database/pkg/transaction"
 )
 
 // Database represents the main database interface providing CRUD operations

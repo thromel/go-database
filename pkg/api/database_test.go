@@ -5,7 +5,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/romel/go-database/pkg/utils"
+	"github.com/thromel/go-database/pkg/utils"
 )
 
 const testDBPath = "test.db"

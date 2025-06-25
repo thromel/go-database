@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/romel/go-database/pkg/api"
+	"github.com/thromel/go-database/pkg/api"
 )
 
 // TestDatabase provides utilities for testing database operations.

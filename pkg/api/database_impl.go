@@ -4,9 +4,9 @@ import (
 	"context"
 	"sync"
 
-	"github.com/romel/go-database/pkg/storage"
-	"github.com/romel/go-database/pkg/transaction"
-	"github.com/romel/go-database/pkg/utils"
+	"github.com/thromel/go-database/pkg/storage"
+	"github.com/thromel/go-database/pkg/transaction"
+	"github.com/thromel/go-database/pkg/utils"
 )
 
 // DatabaseImpl implements the Database interface.

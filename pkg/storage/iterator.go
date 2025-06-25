@@ -1,7 +1,7 @@
 package storage
 
 import (
-	"github.com/romel/go-database/pkg/utils"
+	"github.com/thromel/go-database/pkg/utils"
 )
 
 // MemoryIterator implements the Iterator interface for in-memory storage.

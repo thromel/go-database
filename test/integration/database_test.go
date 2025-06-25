@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/romel/go-database/pkg/api"
-	testutils "github.com/romel/go-database/test/utils"
+	"github.com/thromel/go-database/pkg/api"
+	testutils "github.com/thromel/go-database/test/utils"
 )
 
 // TestDatabaseLifecycle tests the complete database lifecycle.

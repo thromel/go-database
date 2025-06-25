@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	testutils "github.com/romel/go-database/test/utils"
+	testutils "github.com/thromel/go-database/test/utils"
 )
 
 // BenchmarkDatabaseOperations benchmarks basic database operations.
